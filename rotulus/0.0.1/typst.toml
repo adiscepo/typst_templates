@@ -1,0 +1,13 @@
+[package]
+name = "rotulus"
+version = "0.0.1"
+entrypoint = "lib.typ"
+authors = ["Attilio Discepoli"]
+license = "MIT"
+categories = ["report"]
+description = "Template for notes"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "main.png"
