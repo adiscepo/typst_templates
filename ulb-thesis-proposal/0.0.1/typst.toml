@@ -1,0 +1,13 @@
+[package]
+name = "ulb-phd-proposal"
+version = "0.0.1"
+entrypoint = "lib.typ"
+authors = ["Attilio Discepoli"]
+license = "MIT"
+categories = ["report"]
+description = "Template a research proposal"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "main.png"

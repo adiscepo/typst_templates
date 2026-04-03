@@ -4,6 +4,22 @@ The different Typst's templates are stored here.
 
 Each folder contains a different template use for a different project.
 
+## TL;DR
+
+To install the packages locally:
+- On Linux: 
+```sh
+mkdir -p ~/.local/share/typst/packages
+cd ~/.local/share/typst/packages
+git clone git@github.com:adiscepo/typst_templates.git zandies
+cd zandies/
+```
+- On MacOS: 
+```sh
+cd /Users/$USER/Library/Application\ Support/typst/packages/
+git clone git@github.com:adiscepo/typst_templates.git zandies
+```
+
 ## Current templates
 
 |Template name | version | description|
@@ -11,6 +27,7 @@ Each folder contains a different template use for a different project.
 |`folio`| 0.0.1 | Slides inspired of UNIX Commentary book |
 |`notojn`| 0.1.0 | Lecture's notes during my Master |
 |`rotulus`| 0.0.1 | Notes for random stuff with tags |
+|`ulb-thesis-proposal`| 0.0.1 | A template for thesis proposal |
 
 (NB: The names are not the most explicit because of the naming rule of Typst)
 > _Package names should not be the obvious or canonical name for a package with
