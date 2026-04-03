@@ -1,0 +1,7 @@
+#let red = rgb("#f72f2f")
+#let orange = rgb("#f75d2f")
+#let yellow = rgb("#f7ea2f")
+#let green = rgb("#2ff76b")
+#let blue = rgb("#362ff7")
+#let purple = rgb("#e62ff7")
+#let magenta = rgb("#aa2ff7")

@@ -1,0 +1,8 @@
+[package]
+name = "assiettes"
+version = "0.0.1"
+entrypoint = "lib.typ"
+authors = ["Attilio Discepoli"]
+license = "MIT"
+categories = ["assets", "report"]
+description = "Packages with different usefull assets"
