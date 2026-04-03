@@ -2,7 +2,7 @@
 
 #let ulb-thesis-proposal(
   title: "",
-  abstract: [],
+  abstract: "",
   authors: (),
   logo: "assets/ulb_logo.jpg",
   body
@@ -62,19 +62,20 @@
 
   // Abstract page.
   set page(numbering: "I", number-align: center)
-  v(1fr)
   if (abstract != "") {
+  v(1fr)
   align(center)[
     #heading(
       outlined: false,
       numbering: none,
       text(0.85em, smallcaps[Abstract]),
     )
-  ]}
+  ]
   abstract
   v(1.618fr)
-  counter(page).update(1)
   pagebreak()
+  }
+  counter(page).update(1)
 
   // Table of contents.
   outline(depth: 2, title: "Table of Contents")
