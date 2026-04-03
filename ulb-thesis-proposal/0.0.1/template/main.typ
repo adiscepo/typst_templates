@@ -1,7 +1,7 @@
-#import "../lib.typ": ulb-phd-proposal
+#import "../lib.typ": ulb-thesis-proposal
 
 // Les paramètres de la page de garde sont définis ici
-#show: ulb-phd-proposal.with(
+#show: ulb-thesis-proposal.with(
   title: "Master Thesis title",
   authors: (
     (

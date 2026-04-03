@@ -1,6 +1,6 @@
 #import "@preview/hydra:0.6.0": hydra // Template pour les headers
 
-#let ulb-phd-proposal(
+#let ulb-thesis-proposal(
   title: "",
   abstract: [],
   authors: (),
@@ -94,6 +94,6 @@
     line(length: 100%)
   })
   set heading(numbering: "1.1")
-  show heading.where(level: 1): it => pagebreak(weak: true) + it
+  // show heading.where(level: 1): it => pagebreak(weak: true) + it
   body
 }
