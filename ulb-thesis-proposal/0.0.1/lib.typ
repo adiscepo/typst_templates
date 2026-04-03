@@ -81,7 +81,7 @@
   outline(depth: 2, title: "Table of Contents")
 
   set text(size: 12pt, spacing: 3pt)
-  set enum(spacing: 40pt)
+  set enum(spacing: 12pt)
   set page(numbering: "1", number-align: center, margin: (top : 2.5cm, left: 3.5cm, right: 3cm, bottom: 2.5cm))
   set par(first-line-indent: 0pt, leading: 0.5em) // Espacement entre les lignes
   counter(page).update(1)
