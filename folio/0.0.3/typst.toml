@@ -1,0 +1,13 @@
+[package]
+name = "folio"
+version = "0.0.3"
+entrypoint = "lib.typ"
+authors = ["Attilio Discepoli", "Esteban Aguililla Klein"]
+license = "MIT"
+categories = ["presentation"]
+description = "Draw slides inspired from the Lion's commentary on UNIX"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "main.png"

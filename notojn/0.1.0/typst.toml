@@ -1,0 +1,13 @@
+[package]
+name = "notojn"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Attilio Discepoli"]
+license = "MIT"
+categories = ["report"]
+description = "Template for my notes"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "main.png"
