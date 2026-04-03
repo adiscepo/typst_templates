@@ -42,25 +42,25 @@
   header: "",
   date: none,
   tags: (),
+  heading-numbering: none,
   doc,
 ) = {
   set text(font: fonts.sans, size: sizes.body)
   set par(justify: true)
-  // set page(margin: (x: 4em, y: 5em))
-  set heading(numbering: "1.1")
+  set page(margin: (x:6em, y: 5em))
+  set heading(numbering: heading-numbering)
   show heading: it => {
     if it.level == 1 {
       set text(size: sizes.h1, weight: "bold")
       it
     } else if it.level == 2 {
       set text(size: sizes.h2, weight: "bold")
-      v(10pt)
       it
     } else if it.level == 3 {
       set text(size: sizes.h3, weight: "bold")
       it
     }
-    v(5pt)
+    v(1.5pt)
   }
   show raw: it => {
     set text(font: fonts.mono)
@@ -89,7 +89,6 @@
   }
 
   // Header
-
   // Title
   {
     grid(
@@ -104,7 +103,6 @@
         date.display("[day]/[month]/[year]")
       },
     )
-    v(10pt)
   }
   let colors = (blue, red, yellow, green, orange, purple)
   // Tags
@@ -120,7 +118,7 @@
             box(
               inset: (x: 4pt),
               outset: (y: 4pt),
-              // radius: (top-left: 4pt, bottom-right: 4pt, bottom-left: 4pt),
+              radius: (top-left: 4pt, bottom-right: 4pt, bottom-left: 4pt),
               stroke: 0.4pt + c.darken(90%),
               fill: c.lighten(90%),
               text(tag, fill: c.darken(85%), size: sizes.small),
