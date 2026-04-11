@@ -14,12 +14,12 @@
   set heading(numbering: "1.1")
   set par(first-line-indent: 0pt)
   set text(size: 1.1em)
-  show heading: it => {
-    v(10pt)
-    text(it)
-    v(5pt)
-  }
-  // set page(numbering: "1", number-align: center, margin: (top : 2.5cm, left: 3.5cm, right: 3cm, bottom: 2.5cm))
+  // show heading: it => {
+  //   v(10pt)
+  //   text(it)
+  //   v(5pt)
+  // }
+  set page(numbering: "1", number-align: center)
 
   // Logo
   if logo != none {
@@ -42,16 +42,17 @@
           columns: (1fr, 1fr),
           gutter: 5em,
           align(left,
-            emph(authors.at(0).status) + ":" + linebreak() + authors.at(0).name
+            emph(authors.at(0).status) + " :" + linebreak() + authors.at(0).name
           ),
           align(right,
-            emph(authors.at(1).status) + ":" + linebreak() + authors.at(1).name
+            emph(authors.at(1).status) + " :" + linebreak() + authors.at(1).name
           ),
         )
       )
     )  
   )
   // align(center, line(length: 75%))
+  v(15pt)
 
   // Abstract page.
   if (abstract != "") {
