@@ -10,7 +10,7 @@
   // Set the document's basic properties.
   set document(author: authors.map(a => a.name), title: title)
   show math.equation: set text(font: "STIX Two Math", weight: 400)
-  set text(font: "Linux Libertine")
+  // set text(font: "Linux Libertine")
   set heading(numbering: "1.1")
   set par(first-line-indent: 0pt)
   set text(size: 1.1em)
@@ -19,12 +19,15 @@
     text(it)
     v(5pt)
   }
+  // set page(numbering: "1", number-align: center, margin: (top : 2.5cm, left: 3.5cm, right: 3cm, bottom: 2.5cm))
 
+  // Logo
+  if logo != none {
+    place(top + right, dx: 50pt, dy: -50pt, align(right, image(logo, width: 10%)))
+  } else {
+    v(0.75fr)
+  }
   // Title page.
-  v(0.25fr)
-  align(center, text(weight: "regular", ("Université Libre de Bruxelles"), size: 2em))
-  v(0.15fr)
-  align(center, line(length: 75%))
   align(center)[
     #text(2em, weight: 700, smallcaps(title))
   ]
@@ -48,22 +51,10 @@
       )
     )  
   )
-
-  // Logo
-  if logo != none {
-    v(0.50fr)
-    align(center, image(logo, width: 26%))
-    v(0.25fr)
-  } else {
-    v(0.75fr)
-  }
-
-  pagebreak()
+  // align(center, line(length: 75%))
 
   // Abstract page.
-  set page(numbering: "I", number-align: center)
   if (abstract != "") {
-  v(1fr)
   align(center)[
     #heading(
       outlined: false,
@@ -72,28 +63,25 @@
     )
   ]
   abstract
-  v(1.618fr)
-  pagebreak()
   }
   counter(page).update(1)
 
   // Table of contents.
-  outline(depth: 2, title: "Table of Contents")
+  // outline(depth: 2, title: "Table of Contents")
 
-  set text(size: 12pt, spacing: 3pt)
+  // set text(size: 12pt, spacing: 3pt)
   set enum(spacing: 12pt)
-  set page(numbering: "1", number-align: center, margin: (top : 2.5cm, left: 3.5cm, right: 3cm, bottom: 2.5cm))
-  set par(first-line-indent: 0pt, leading: 0.5em) // Espacement entre les lignes
+  // set par(first-line-indent: 0pt, leading: 0.5em) // Espacement entre les lignes
   counter(page).update(1)
   
-  set page(header: context {
-    if calc.odd(here().page()) {
-      align(right, emph(hydra(1)))
-    } else {
-      align(left, emph(hydra(2)))
-    }
-    line(length: 100%)
-  })
+  // set page(header: context {
+  //   if calc.odd(here().page()) {
+  //     align(right, emph(hydra(1)))
+  //   } else {
+  //     align(left, emph(hydra(2)))
+  //   }
+  //   line(length: 100%)
+  // })
   set heading(numbering: "1.1")
   // show heading.where(level: 1): it => pagebreak(weak: true) + it
   body
