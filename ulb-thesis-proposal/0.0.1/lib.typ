@@ -14,11 +14,10 @@
   set heading(numbering: "1.1")
   set par(first-line-indent: 0pt)
   set text(size: 1.1em)
-  // show heading: it => {
-  //   v(10pt)
-  //   text(it)
-  //   v(5pt)
-  // }
+  show heading: it => {
+    text(it)
+    v(5pt)
+  }
   set page(numbering: "1", number-align: center)
 
   // Logo
