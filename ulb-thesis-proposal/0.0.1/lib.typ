@@ -31,6 +31,7 @@
   align(center)[
     #text(2em, weight: 700, smallcaps(title))
   ]
+  set par(justify: true)
 
   // Author information.
   pad(
