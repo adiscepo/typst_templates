@@ -28,6 +28,7 @@ git clone git@github.com:adiscepo/typst_templates.git zandies
 |`notojn`| 0.1.0 | Lecture's notes during my Master |
 |`rotulus`| 0.0.1 | Notes for random stuff with tags |
 |`ulb-thesis-proposal`| 0.0.1 | A template for thesis proposal |
+|`carrare`| 0.0.1 | A template for technical report/documentation |
 
 |Packages | version | description|
 |-|-|-|

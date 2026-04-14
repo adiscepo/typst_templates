@@ -1,0 +1,13 @@
+[package]
+name = "carrare"
+version = "0.0.1"
+entrypoint = "lib.typ"
+authors = ["Attilio Discepoli"]
+license = "MIT"
+categories = ["report"]
+description = "A segmented layout inspired from norms and report documents"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "main.png"
