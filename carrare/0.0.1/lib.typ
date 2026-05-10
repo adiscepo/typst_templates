@@ -134,7 +134,7 @@
                 outset: (y: 4pt),
                 stroke: 0.4pt + c.darken(50%),
                 fill: c.lighten(90%),
-                text(tag, size: 0.8em, fill: c.darken(75%)),
+                text(tag, font: fonts.tertiary, size: 0.7em, fill: c.darken(75%)),
               )
             }),
         )
