@@ -1,0 +1,13 @@
+[package]
+name = "ulb-practicals"
+version = "0.0.1"
+entrypoint = "lib.typ"
+authors = ["Attilio Discepoli"]
+license = "MIT"
+categories = ["report"]
+description = "Instructions for practicals with ULB header (for CS lectures in Operating Systems)"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "main.png"
