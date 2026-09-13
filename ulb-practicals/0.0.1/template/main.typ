@@ -1,4 +1,5 @@
 #import "../lib.typ": exercice, ulb-practicals
+#import "@zandies/assiettes:0.0.1": *
 
 // Les paramètres de la page de garde sont définis ici
 #show: ulb-practicals.with(
@@ -150,8 +151,184 @@ Donc, devant un pointeur (qui est une adresse), l'étoile permet d’accéder à
     Retrouvez la solution sur l'UV.
 
     Dans cet exemple, on voit que la variable `b` est indépendante de `a`, car la valeur est copiée. Les adresses imprimées montrent que `a` et `b` ne partagent pas le même emplacement mémoire. Enfin, le pointeur `ptr` contient l'adresse de `a`, et le déréférencement `*ptr` permet d'accéder à sa valeur.
-    ],
+  ],
 )
 
-== Structure de la mémoire
+= Structure de la mémoire
 Lorsque vous utilisez des variables en C, leur contenu peut se trouver dans un de ces deux endroits de la mémoire: le _heap_ ou le _stack_.
+
+== Le stack
+Conceptuellement, le _stack_, le _call stack_ ou la pile (d'exécution) en français est la structure de données qui enregistre les informations au sujet des fonctions appelées successivement. On y trouve, entre autres, les variables locales des fonctions. Chaque appel de fonction donne lieu à un nouveau _stack frame_ sur le dessus de la pile et, inversement, chaque retour de fonction donne lieu à une suppression du _stack frame_ sur le dessus de la pile. Ce procédé est illustré par du code dans le @lst:foo et visuellement dans la @fig:stack.
+
+#figure(
+  grid(
+    columns: (1fr, 1fr),
+
+    ```c
+    int main() {
+        int x = 3;
+        int r = foo();
+        return 0;
+    }
+    ```,
+    ```c
+      int foo() {
+          int y = 7;
+          return y - 2;
+      }
+    ```,
+  ),
+  caption: "Exemple d'appel de fonction.",
+) <lst:foo>
+
+#figure(
+  align(
+    center,
+    grid(
+      columns: (1fr, 1fr, 1fr),
+      [
+
+        #memory-stack(
+          (
+            memory-cell([], stroke: (left: (dash: "dashed"), right: (dash: "dashed")), height: 57pt),
+            memory-cell(
+              [
+                ```c
+                main()
+                int r;
+                int x = 3;
+                ```
+              ],
+              height: 45pt,
+            ),
+          ),
+        )
+      ],
+      [
+        #memory-stack(
+          (
+            memory-cell([], stroke: (left: (dash: "dashed"), right: (dash: "dashed"))),
+            memory-cell(
+              [
+                ```c
+                foo()
+                int y = 7;
+                ```
+              ],
+              height: 35pt,
+            ),
+            memory-cell(
+              [
+                ```c
+                main()
+                int r;
+                int x = 3;
+                ```
+              ],
+              height: 45pt,
+            ),
+          ),
+        )
+
+      ],
+      [
+        #memory-stack(
+          (
+            memory-cell([], stroke: (left: (dash: "dashed"), right: (dash: "dashed")), height: 57pt),
+            memory-cell(
+              [
+                ```c
+                main()
+                int r;
+                int x = 3;
+                ```
+              ],
+              height: 45pt,
+            ),
+          ),
+        )
+      ],
+    ),
+  ),
+  caption: "Évolution de la pile lors d’appels et retours de fonction.",
+  kind: image,
+) <fig:stack>
+
+Très concrètement, le _stack_ est une zone de la mémoire dans laquelle réside la structure de données décrite plus haut. Étant donné que le _stack_ enregistre les appels successifs de fonction, il est important de noter que chaque _thread_ dispose de son propre _stack_.
+
+Une conséquence de la manière dont le _stack_ fonctionne est que les variables qui s'y trouvent ne peuvent pas changer de taille. En effet, si une variable se trouvant dans le `main` devait grandir (en nombre de bytes), il faudrait déplacer toutes les variables qui se trouvent _au dessus_, ce qui serait très coûteux. Plus encore: la taille des variables, c'est-à-dire le nombre de bytes qu'elles occupent en mémoire, est connu au moment de la compilation.
+
+== Le heap
+Le _heap_ est lui aussi une zone en mémoire dans laquelle on peut stocker des variables dont la taille peut varier au cours du temps. Le _heap_ est géré par le système d'exploitation et il est possible de lui demander de nous attribuer de la mémoire à la demande. Cette zone mémoire est attachée à un pointeur vers la zone attribuée.
+
+Contrairement au _stack_, le _heap_ est spécifique au processus et est partagé entre ses différents threads.
+// Cela signifie que deux threads peuvent accéder et modifier des variables partagées dans le _heap_, ce qui peut mener à de nombreux problèmes auxquels nous reviendrons dans de prochains TPs.
+
+=== Allocation de mémoire dynamique
+Dans le langage C, cette demande se fait à l'aide de la fonction `malloc` comme indiqué dans le Listing~\ref{lst:malloc}. Notez qu'il existe toute une famille de fonctions d'allocation de mémoire telles que `calloc` ou `realloc`. Consultez le manuel pour plus d'informations (`man malloc`).
+
+#figure(
+  ```c
+    int taille;
+    scanf("\%d", &taille);
+    int* tableau = (int*) malloc(sizeof(int) * taille);
+    if (tableau == NULL) {
+        // Si malloc échoue, il retourne 0 / NULL,
+        // et change la valeur de la variable globale errno pour indiquer l'erreur.
+        // La fonction perror utilise errno pour indiquer l'erreur.
+        perror("L'allocation de la mémoire a échoué")
+        // Sur un système en anglais, la ligne ci-dessus affiche:
+        //     L'allocation de la mémoire a échoué: Cannot allocate memory
+        exit(1);
+    }
+  ```,
+  caption: [Allocation dynamique avec `malloc`],
+)
+
+Remarquez qu'il est important de vérifier la validité du pointeur alloué! Si jamais l'OS renvoie `NULL`, cela signifie probablement qu'il n'a plus de mémoire disponible, auquel cas il est urgent de terminer le programme.
+
+
+#exercice(
+  [
+    Tous les pointeurs valides pointent-ils vers le heap~? Expliquez ou donnez un contre-exemple.  ],
+  solution: [
+    Non. On peut prendre l'adresse d'une variable du stack en faisant `int *p = &x;`.
+  ],
+)
+#exercice(
+  [
+    Sachant que sur un système à 64 bits, une adresse tient sur 64 bits. Que renvoient `sizeof(int *)`, `sizeof(char *)` et `sizeof(int **)` ?
+  ],
+  solution: [
+    Dans tous les cas, une adresse fait 64 bits (donc 8 bytes). La réponse est donc systématiquement 8.
+  ],
+)
+
+=== Libération de mémoire dynamique
+
+Notez que dans le langage C, la mémoire allouée dynamiquement n'est pas libérée automatiquement, c'est-à-dire qu'il n'y a pas de _garbage collector_.
+Par conséquent, tant que le programme tourne, la mémoire allouée n'est pas libérée, ce qui peut causer des fuites de mémoire, ou _memory leaks_.
+Lorsqu'une zone mémoire n'est plus utilisée, il faut appeler la fonction `free()` qui libère la mémoire allouée.
+
+#figure(
+  ```c
+    int* tableau = (int*) malloc(sizeof(int) * taille);
+    if (tableau == NULL) {
+        exit(1);
+    }
+    /* Utilisation du tableau */
+    // ...
+    /* Le tableau n'est plus utilisé */
+    free(tableau);
+  ```,
+  caption: [Libération de mémoire avec `free`],
+)
+
+#exercice(
+  [
+    Récupérez le fichier header `list.h` sur l'UV et écrivez un fichier `list.c` qui permet de gérer une liste dynamique d'entiers. Vous devez écrire le corps des fonctions déclarées dans `list.h`. Ensuite, écrivez un `main()` qui utilise ces fonctionnalités.
+  ],
+  solution: [
+    Retrouvez les solutions sur l'UV dans un fichier zip.
+  ],
+)

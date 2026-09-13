@@ -11,6 +11,7 @@
 
 #let text-size = (
   xs: 8pt,
+  code: 9pt,
   sm: 10pt,
   base: 11pt,
   lg: 14pt,

@@ -31,7 +31,7 @@
   set terms(hanging-indent: 30pt)
   set par(first-line-indent: 0pt, spacing: 11pt)
   set text(size: text-size.base, lang: "fr", hyphenate: true)
-  show raw: set text(font: "New Computer Modern Mono", size: text-size.sm)
+  show raw: set text(font: "New Computer Modern Mono", size: text-size.code)
 
   show heading: it => {
     let size = if it.level == 1 {
@@ -89,6 +89,7 @@
     align(left, box(width: 100%, it.body))
     align(center, box(it.caption))
   }
+  show figure.where(kind: raw): set figure(supplement: "Listing")
 
   // ---- The document starts here ----
   v(45pt)
@@ -130,15 +131,18 @@
 #let exercice(body, solution: content) = {
   exercice_counter.step()
   set list(marker: [---], indent: 10pt)
-  line(length: 100%, stroke: (thickness: 0.4pt))
-  strong(text("Exercice " + context exercice_counter.display() + ".", fill: colors.ulb))
-  {
-    show text: it => emph(it)
-    body
-  }
-  context if state("solution").get() {
-    v(10pt)
-    strong(text("Réponse", fill: colors.ulb) + " :")
-    solution
-  }
+  block(breakable: false, {
+    v(5pt)
+    line(length: 100%, stroke: (thickness: 0.4pt))
+    strong(text("Exercice " + context exercice_counter.display() + ".", fill: colors.ulb))
+    {
+      show text: it => emph(it)
+      body
+    }
+    v(1pt)
+    context if state("solution").get() {
+      strong(text("Réponse", fill: colors.ulb) + " :")
+      solution
+    }
+  })
 }
