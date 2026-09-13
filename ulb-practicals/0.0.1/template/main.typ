@@ -1,4 +1,4 @@
-#import "../lib.typ": ulb-practicals
+#import "../lib.typ": exercice, ulb-practicals
 
 // Les paramètres de la page de garde sont définis ici
 #show: ulb-practicals.with(
@@ -26,7 +26,7 @@
     ),
   ),
   course: "INFO-F-201 — Systèmes d'exploitation",
-  logo: "assets/ulb_logo.jpg", // L'image doit se trouver dans le répertoire du projet
+  show_solution: true,
 )
 
 
@@ -88,37 +88,70 @@ C’est pourquoi la majorité des noyaux modernes comme Unix, Linux, macOS ou Wi
 == Sémantique par défaut des variables
 
 En C, lorsqu'on déclare une variable, elle contient une valeur.
-Par défaut, la sémantique des variables est une \emph{sémantique de copie} : cela signifie que quand on affecte une variable à une autre, ou quand on passe une variable en argument à une fonction, la valeur est copiée.
+Par défaut, la sémantique des variables est une _sémantique de copie_ : cela signifie que quand on affecte une variable à une autre, ou quand on passe une variable en argument à une fonction, la valeur est copiée.
 
-\begin{lstlisting}[caption=Exemple de copie de variable]
-int a = 5;
-int b = a; // ici la valeur 5 est copiée dans b
-b = 10;    // ceci ne modifie pas a
-\end{lstlisting}
+#figure(
+  ```c
+  int a = 5;
+  int b = a; // ici la valeur 5 est copiée dans b
+  b = 10;    // ceci ne modifie pas a
+  ```,
+  caption: "Exemple de copie de variable",
+)
 
-Ainsi, modifier la variable \lstinline|b| n'a pas d'effet sur \lstinline|a| puisque ce sont deux emplacements mémoire différents.
+Ainsi, modifier la variable `b` n'a pas d'effet sur `a` puisque ce sont deux emplacements mémoire différents.
 
 == Qu'est-ce qu'une adresse ?
 
-Une \emph{adresse} est un numéro unique qui identifie un emplacement en mémoire. Chaque variable occupe un certain emplacement mémoire, et on peut accéder à cet emplacement via son adresse.
+Une _adresse_ est un numéro unique qui identifie un emplacement en mémoire. Chaque variable occupe un certain emplacement mémoire, et on peut accéder à cet emplacement via son adresse.
 
-On peut obtenir l'adresse d'une variable en utilisant l'opérateur \lstinline|&|.
-On peut aussi parler de ce qui est à une adresse avec l'opérateur \lstinline|\*|.
+On peut obtenir l'adresse d'une variable en utilisant l'opérateur `&`.
+On peut aussi parler de ce qui est à une adresse avec l'opérateur `*`.
 
-\begin{lstlisting}[caption=Obtenir l'adresse d'une variable]
-int x = 3;
-printf("Adresse de x : %p\n", (void*)&x);
-*(&x) = 4; // équivalent à "x = 4"
-\end{lstlisting}
+#figure(
+  ```c
+  int x = 3;
+  printf("Adresse de x : %p\n", (void*)&x);
+  *(&x) = 4; // équivalent à "x = 4"
+  ```,
+  caption: "Obtenir l'adresse d'un variable",
+)
 
 == Pointeurs
 
-Un \emph{pointeur} est le type d'une variable qui stocke une \emph{adresse} mémoire.
-Ou plutôt, une variable qui stocke l'adresse d'un entier doit être de type «pointeur vers un entier».
-Ceci s'écrit: \lstinline|int\*|.
-«Pointeur» et «adresse» sont donc synonyme.
+Un _pointeur_ est le type d'une variable qui stocke une _adresse_ mémoire.
+Ou plutôt, une variable qui stocke l'adresse d'un entier doit être de type "pointeur vers un entier".
+Ceci s'écrit: `int*`.
+"Pointeur" et "adresse" sont donc synonyme.
 
-Quand l'étoile \lstinline|*| est utilisée après un \textbf{type} X, elle signifie: «pointeur vers X» / «adresse d'un X». C'est la déclaration d'un type. Ce n'est pas une opération. Par exemple, pointeur vers int: \lstinline|int*|.
+Quand l'étoile `*` est utilisée après un *type* X, elle signifie: "pointeur vers X" / "adresse d'un X". C'est la déclaration d'un type. Ce n'est pas une opération. Par exemple, pointeur vers int: `int*`.
 
-Mais quand l'étoile est utilisée avant une \textbf{adresse} Y, elle signifie: «ce qui se trouve à l'adresse Y». (On l'appelle, opérateur de déréférencement.) C'est ce qu'on a fait dans l'exemple précédent. C'est une opération.
+Mais quand l'étoile est utilisée avant une *adresse* Y, elle signifie: "ce qui se trouve à l'adresse Y". (On l'appelle, opérateur de déréférencement.) C'est ce qu'on a fait dans l'exemple précédent. C'est une opération.
 Donc, devant un pointeur (qui est une adresse), l'étoile permet d’accéder à la valeur pointée.
+
+
+#figure(
+  ```c
+  int y = 7;
+  int *ptr = &y;    // ptr est une variable de type pointeur vers entier
+  printf("%d\n", *ptr); // affiche la valeur de y (7) via son pointeur
+  ```,
+  caption: "Déclaration et utilisation d'un pointeur",
+)
+
+#exercice(
+  [
+    Partez du fichier `exo1.c` qui se trouve sur l'UV. Compilez avec `make exo1`.
+    - Déclarez deux variables entières. Affectez la valeur de l’une dans l’autre. Modifiez la deuxième variable et expliquez pourquoi la première n'est pas modifiée.
+    - Affichez l'adresse de chacune de ces variables.
+    - Déclarez un pointeur vers une des variables et affichez la valeur de la variable à travers le pointeur.
+  ],
+  solution: [
+    Retrouvez la solution sur l'UV.
+
+    Dans cet exemple, on voit que la variable `b` est indépendante de `a`, car la valeur est copiée. Les adresses imprimées montrent que `a` et `b` ne partagent pas le même emplacement mémoire. Enfin, le pointeur `ptr` contient l'adresse de `a`, et le déréférencement `*ptr` permet d'accéder à sa valeur.
+    ],
+)
+
+== Structure de la mémoire
+Lorsque vous utilisez des variables en C, leur contenu peut se trouver dans un de ces deux endroits de la mémoire: le _heap_ ou le _stack_.

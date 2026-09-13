@@ -1,16 +1,28 @@
 #import "@preview/hydra:0.6.0": hydra // Template pour les headers
 #import "theme.typ": *
 
+#let soluce = state("solution", false)
+
 #let ulb-practicals(
   title: "",
   university: "UNIVERSITÉ LIBRE DE BRUXELLES, UNIVERSITÉ D’EUROPE",
   faculty: "Faculté des Sciences — Département d'Informatique",
   footer: "MEMBRE DE L’ACADÉMIE UNIVERSITAIRE WALLONIE-BRUXELLES ET DU PÔLE UNIVERSITAIRE EUROPÉEN BRUXELLES-WALLONIE",
   authors: (),
-  course: "INFO-F-201 — Systèmes d'exploitation",
+  course: "Définir le nom du cours avec l'attribut `course`",
   logo: "assets/ulb_logo.jpg",
+  show_solution: false,
   body,
 ) = {
+  if "solutions" in sys.inputs.keys() {
+    if sys.inputs.solutions == "true" {
+      show_solution = true
+    } else if sys.inputs.solutions == "false" {
+      show_solution = false
+    }
+  }
+  soluce.update(d => show_solution)
+
   // Set the document's basic properties.
   set document(author: authors.map(a => a.name), title: title)
   set text(font: fonts.main)
@@ -18,9 +30,9 @@
   set heading(numbering: "1.1")
   set terms(hanging-indent: 30pt)
   set par(first-line-indent: 0pt, spacing: 11pt)
-  set text(size: text-size.base, lang: "fr")
-  // show "«": it => {it + h(2pt)}
-  // show "»": it => {h(2pt) + it}
+  set text(size: text-size.base, lang: "fr", hyphenate: true)
+  show raw: set text(font: "New Computer Modern Mono", size: text-size.sm)
+
   show heading: it => {
     let size = if it.level == 1 {
       text-size.lg
@@ -33,6 +45,8 @@
     text(it, size: size)
     v(0.5em)
   }
+
+  // Set the page properties (header and footer)
   set page(
     numbering: "1",
     margin: (x: 65pt, y: 94.7pt),
@@ -68,6 +82,15 @@
     ],
   )
 
+  // Set figure properties (full width)
+  set figure.caption(separator: " - ")
+  show figure.caption: it => smallcaps(it)
+  show figure: it => {
+    align(left, box(width: 100%, it.body))
+    align(center, box(it.caption))
+  }
+
+  // ---- The document starts here ----
   v(45pt)
   // Title page.
   align(center)[
@@ -93,27 +116,29 @@
       },
     )),
   )
-
-  // Abstract page.
-  counter(page).update(1)
-
-  // Table of contents.
-  // outline(depth: 2, title: "Table of Contents")
-
-  // set text(size: 12pt, spacing: 3pt)
   set enum(spacing: 12pt)
-  // set par(first-line-indent: 0pt, leading: 0.5em) // Espacement entre les lignes
   counter(page).update(1)
 
-  // set page(header: context {
-  //   if calc.odd(here().page()) {
-  //     align(right, emph(hydra(1)))
-  //   } else {
-  //     align(left, emph(hydra(2)))
-  //   }
-  //   line(length: 100%)
-  // })
   set heading(numbering: "1.1")
-  // show heading.where(level: 1): it => pagebreak(weak: true) + it
+
+  // The actual content of the document
   body
+}
+
+#let exercice_counter = counter("exercices")
+
+#let exercice(body, solution: content) = {
+  exercice_counter.step()
+  set list(marker: [---], indent: 10pt)
+  line(length: 100%, stroke: (thickness: 0.4pt))
+  strong(text("Exercice " + context exercice_counter.display() + ".", fill: colors.ulb))
+  {
+    show text: it => emph(it)
+    body
+  }
+  context if state("solution").get() {
+    v(10pt)
+    strong(text("Réponse", fill: colors.ulb) + " :")
+    solution
+  }
 }
