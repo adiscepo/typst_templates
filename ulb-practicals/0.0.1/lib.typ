@@ -31,7 +31,17 @@
   set terms(hanging-indent: 30pt)
   set par(first-line-indent: 0pt, spacing: 11pt)
   set text(size: text-size.base, lang: "fr", hyphenate: true)
-  show raw: set text(font: "New Computer Modern Mono", size: text-size.code)
+  set enum(indent: text-size.lg, spacing: text-size.xs)
+
+  show raw: it => {
+    if (it.block) {
+      set text(font: fonts.code, size: text-size.code)
+      it
+    } else {
+      set text(font: fonts.code, size: text-size.base)
+      it
+    }
+  }
 
   show heading: it => {
     let size = if it.level == 1 {
@@ -117,7 +127,6 @@
       },
     )),
   )
-  set enum(spacing: 12pt)
   counter(page).update(1)
 
   set heading(numbering: "1.1")
@@ -128,7 +137,14 @@
 
 #let exercice_counter = counter("exercices")
 
-#let exercice(body, solution: content) = {
+#let answer(body) = {
+  context if state("solution").get() {
+    strong(text("Réponse", fill: colors.ulb) + " : ")
+    body
+  }
+}
+
+#let exercise(body, solution: none) = {
   exercice_counter.step()
   set list(marker: [---], indent: 10pt)
   block(breakable: false, {
@@ -139,10 +155,58 @@
       show text: it => emph(it)
       body
     }
-    v(1pt)
-    context if state("solution").get() {
-      strong(text("Réponse", fill: colors.ulb) + " :")
-      solution
+    if solution != none {
+      v(2pt)
+      answer(solution)
     }
   })
+}
+
+
+#let header(body, description: none) = {
+  line(length: 100%, stroke: (thickness: 0.4pt))
+  set text(size: text-size.lg, weight: "bold")
+  align(center, body)
+  line(length: 100%, stroke: (thickness: 0.4pt))
+  set text(size: text-size.footnote, weight: "regular")
+  description
+}
+
+#let note(body) = {
+  set par(justify: true, leading: 7pt)
+  block(
+    fill: colors.ulb_light,
+    inset: 10pt,
+    text("Note :  ", fill: colors.ulb, weight: "bold") + emph(body),
+  )
+}
+
+#let command(body) = {
+  // lang: "en" in order to prevent the smartquote produced by french
+  set text(size: text-size.base, lang: "en", font: fonts.code)
+  box(
+    fill: colors.gray_command,
+    outset: 1pt,
+    body,
+  )
+}
+
+#let key(..key) = {
+  upper(text(
+    key.pos().join("+"),
+    font: fonts.sans,
+  ))
+}
+
+#let paragraph(title) = {
+  v(text-size.base)
+  box(strong(title)) + h(10pt)
+}
+
+#let textbf(body) = {
+  strong(body)
+}
+
+#let textit(body) = {
+  emph(body)
 }
