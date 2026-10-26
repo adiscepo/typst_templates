@@ -1,8 +1,10 @@
+#import "utils.typ": *
 #import "@preview/cetz:0.5.3"
 
 #let config = (
   task_height: 0.8cm,
   step_width: 2em,
+  colors: none,
 )
 
 #let task_label(i) = $tau_#i$
@@ -12,12 +14,41 @@
 }
 
 #let plot(
+  // start of the interval
   from: int,
+  // end of the interval (included)
   to: int,
-  step: int,
-  scheduler: function,
+  // number of step used on the x-axis (default: 1)
+  step: 1,
+  // the taskset display on the plot, the order of the tasks depend on their
+  // order in the array (element at index i has index i + 1)
+  // each task contains at least the following fields:
+  // - o: int, the offset (optional)
+  // - c: int, the wcet (mandatory)
+  // - d: int, the deadline (mandatory)
+  // - t: int, the period (mandatory)
   tasks: array,
-  config: config,
+  // the configuration of the plot (array)
+  // contains the following fields
+  // - config.task_height (mandatory)
+  //   the height of the tasks
+  // - config.step_width (mandatory)
+  //   the width of the tasks
+  // - config.colors (optional)
+  //   the colors from which each task get their color (by index modulo
+  //   the number of colors)
+  config: (
+    task_height: 0.8cm,
+    step_width: 2em,
+    colors: none,
+  ),
+  // the scheduling function, if none only the plot is displayed
+  // the function take the array of running_jobs and the instant t
+  // and return the array sorted with the highest priority task in first
+  // position
+  scheduler: none,
+  // display a mark to indicate an idle instant (default: false)
+  display-idle: false,
 ) = {
   cetz.canvas({
     import cetz.draw: *
@@ -79,11 +110,34 @@
       }
     }
 
-    let plot-deadline(task_id, t) = {
-      let task = tasks.at(task_id - 1)
+    let plot-release(task_id, t) = {
       let task-pos = task-pos(task_id, t: t)
-      let x-deadline = t - from + task.d
+      // Prevent printing the mark outside the plot
+      let x-pos = config.step_width * t
+      line(
+        (x-pos, task-pos.y - (config.task_height / 4)),
+        (x-pos, task-pos.y),
+        mark: (start: "barbed", length: config.task_height / 10),
+      )
+    }
+
+    let plot-deadline(task_id, t) = {
       plot-mark(task_id, t, dy: config.task_height / 2, "x", scale: 0.7)
+    }
+
+    let plot-missed-deadline(task_id, t) = {
+      plot-mark(
+        task_id,
+        t,
+        dx: config.step_width / 2,
+        dy: config.task_height / 2,
+        "x",
+        stroke: 1pt + red,
+      )
+    }
+
+    let plot-idle(task_id, t) = {
+      plot-mark(task_id, t, dx: config.step_width / 2, dy: config.task_height / 1.5, "<>", fill: black, scale: 0.7)
     }
 
     let job(task_id, task, t) = {
@@ -102,10 +156,34 @@
 
     let spawn_jobs(tasks, t) = {
       let new_jobs = ()
-      for (i, task) in tasks.enumerate() {
-        if (calc.rem(t, task.t) == 0) {
-          new_jobs.push(job(i + 1, task, t))
+      for (i, task-param) in tasks.enumerate() {
+        let task = i + 1
+        if (not task-param.keys().contains("o")) {
+          task-param.insert("o", 0)
         }
+        if (is-task-asynchronous(task-param)) {
+          // Asynchronous case
+          if (t == task-param.o) {
+            new_jobs.push(job(task, task-param, t))
+          } else if (t >= task-param.o + task-param.t) {
+            if (calc.rem(t - task-param.o, task-param.t) == 0) {
+              new_jobs.push(job(task, task-param, t))
+            }
+          }
+        } else {
+          // Synchronous case
+          if (calc.rem(t, task-param.t) == 0) {
+            new_jobs.push(job(task, task-param, t))
+          }
+        }
+
+        // if (task.t + task.o == t) {
+        //   new_jobs.push(job(i + 1, task, t))
+        //   continue
+        // }
+        // if (calc.rem(t, task.t) == 0) {
+        //   new_jobs.push(job(i + 1, task, t))
+        // }
       }
       return new_jobs
     }
@@ -116,43 +194,47 @@
       rect(
         (task-pos.x * config.step_width, task-pos.y),
         ((task-pos.x + n) * config.step_width, task-pos.y + config.task_height),
-        // fill: colors.at(task_id - 1),
+        fill: if (config.keys().contains("colors")) {
+          if (config.colors != none) {
+            config.colors.at(calc.rem(task_id - 1, config.colors.len()))
+          }
+        },
         // stroke: 0pt,
       )
     }
 
-    // plot-mark(2, 6, dy: 4mm, "x", stroke: 1pt + red)
-    let running_jobs = ()
-    let current_job = none
-    let deadline_missed = false
-    // Schedule
-    for t in range(from, to) {
-      // Check deadline miss
-      for job in running_jobs {
-        if (job.deadline <= t and job.remaining_computation != 0) {
-          plot-mark(
-            running_jobs.at(0).task_id,
-            t,
-            dx: config.step_width / 2,
-            dy: config.task_height / 2,
-            "x",
-            stroke: 1pt + red,
-          )
-          deadline_missed = true
+    if (scheduler != none) {
+      // plot-mark(2, 6, dy: 4mm, "x", stroke: 1pt + red)
+      let running_jobs = ()
+      let current_job = none
+      let deadline_missed = false
+      // Schedule
+      for t in range(from, to) {
+        // Check deadline miss
+        for job in running_jobs {
+          if (job.deadline <= t and job.remaining_computation != 0) {
+            plot-missed-deadline(job.task_id, t)
+            deadline_missed = true
+          }
         }
-      }
-      if (deadline_missed) { break }
-      // Spawn jobs
-      for job in spawn_jobs(tasks, t) {
-        running_jobs.push(job)
-      }
-      // schedule for one step
-      // schedule() put the highest priority job at the beginning of the list
-      running_jobs = scheduler(running_jobs, t)
-      if (running_jobs.len() > 0) {
-        plot-execution(running_jobs.at(0).task_id, t)
-        running_jobs.at(0).remaining_computation -= 1
-        running_jobs = running_jobs.filter(job => job.remaining_computation > 0)
+        if (deadline_missed) { break }
+        // Spawn jobs
+        for job in spawn_jobs(tasks, t) {
+          running_jobs.push(job)
+        }
+        // schedule for one step
+        // schedule() put the highest priority job at the beginning of the list
+        running_jobs = scheduler(running_jobs, t)
+        if (running_jobs.len() > 0) {
+          plot-execution(running_jobs.at(0).task_id, t)
+          running_jobs.at(0).remaining_computation -= 1
+          running_jobs = running_jobs.filter(job => job.remaining_computation > 0)
+        } else {
+          // we have an idle instant
+          if (display-idle) {
+            plot-idle(calc.floor((tasks.len() + 1) / 2), t)
+          }
+        }
       }
     }
 
@@ -162,17 +244,28 @@
         let task-pos = task-pos(task, t: t)
         // - 1 because tasks starts at 1 but array at 0
         let task-param = tasks.at(task - 1)
+        // set offset to 0 if absent
+        if (not task-param.keys().contains("o")) {
+          task-param.insert("o", 0)
+        }
         let x-pos = config.step_width * (t - from)
         // Releases
-        if (calc.rem(t, task-param.t) == 0) {
-          line(
-            (x-pos, task-pos.y - (config.task_height / 4)),
-            (x-pos, task-pos.y),
-            mark: (start: "barbed", length: config.task_height / 10),
-          )
-          // Deadline
-          if (t != 0) {
-            plot-deadline(task, t)
+        if (is-task-asynchronous(task-param)) {
+          // Asynchronous case
+          if (t == task-param.o) {
+            plot-release(task, t)
+            plot-deadline(task, t + task-param.d)
+          } else if (t >= task-param.o + task-param.t) {
+            if (calc.rem(t - task-param.o, task-param.t) == 0) {
+              plot-release(task, t)
+              plot-deadline(task, t + task-param.d)
+            }
+          }
+        } else {
+          // Synchronous case
+          if (calc.rem(t, task-param.t) == 0) {
+            plot-release(task, t)
+            plot-deadline(task, t + task-param.d)
           }
         }
       }
@@ -180,25 +273,7 @@
   })
 }
 
-#let is-synchronous(tasks) = {
-  for task in tasks { if (task.keys().contains("o")) { if task.o != 0 { return false } } }
-  return true
-}
-
-#let is-implicit(tasks) = {
-  for task in tasks { if task.d != task.t { return false } }
-  return true
-}
-
-#let is-constrained(tasks) = {
-  for task in tasks { if task.d > task.t { return false } }
-  return true
-}
-
-#let is-arbitrary(tasks) = {
-  return not is-constrained(tasks)
-}
-
+// Return a string desribing the taskset (synchronicity and deadline)
 #let describe-taskset(tasks) = {
   if is-synchronous(tasks) { "synchronous" } else { "asynchronous" } + " "
   (
@@ -207,20 +282,8 @@
   )
 }
 
-#let utilization(tasks) = {
-  tasks.map(task => task.c / task.t).sum()
-}
-
-#let hyperperiod(tasks) = {
-  let res = tasks.first().t
-  for (i, task) in tasks.enumerate() {
-    if (i != 0) {
-      res = calc.lcm(res, task.t)
-    }
-  }
-  res
-}
-
+// Return a table displaying the taskset
+// If the taskset is synchronous, column "offset" is hidden
 #let print-taskset(tasks) = {
   if is-synchronous(tasks) {
     table(
@@ -271,7 +334,7 @@
 
 #let tasks = (
   (c: 2, d: 8, t: 8),
-  (c: 3, d: 10, t: 10),
+  (o: 3, c: 3, d: 10, t: 10),
   (c: 5, d: 14, t: 14),
 )
 
@@ -280,6 +343,17 @@
 //   (c: 50, d: 100, t: 150),
 //   (c: 5, d: 100, t: 40),
 // )
+
+#let tasks = (
+  (o: 0, c: 2, d: 5, t: 5),
+  (o: 1, c: 4, d: 10, t: 10),
+)
+
+#let tasks = (
+  (o: 10, c: 1, d: 2, t: 3),
+  (o: 5, c: 2, d: 5, t: 5),
+  (o: 0, c: 3, d: 10, t: 15),
+)
 
 #print-taskset(tasks)
 // #describe-taskset(tasks)
@@ -305,7 +379,26 @@
   return running_jobs.sorted(key: it => it.deadline)
 }
 
-#plot(from: 0, to: 20, step: 2, scheduler: rm, tasks: tasks, config: config)
+#plot(from: 0, to: 40, step: 2, tasks: tasks, config: (
+  task_height: 0.8cm,
+  step_width: 1em,
+))
 
-#plot(from: 0, to: 20, step: 1, scheduler: edf, tasks: tasks, config: config)
+#plot(from: 0, to: 40, step: 2, scheduler: rm, tasks: tasks, config: (
+  task_height: 0.8cm,
+  step_width: 1em,
+))
 
+#plot(from: 0, to: 40, step: 2, scheduler: edf, tasks: tasks, config: (
+  task_height: 0.8cm,
+  step_width: 1em,
+))
+
+#let priority_assignement(running_jobs, t) = {
+  return running_jobs.sorted(key: it => it.task_id)
+}
+
+#plot(from: 0, to: 40, step: 2, scheduler: priority_assignement, tasks: tasks, display-idle: true, config: (
+  task_height: 0.8cm,
+  step_width: 1em,
+))
