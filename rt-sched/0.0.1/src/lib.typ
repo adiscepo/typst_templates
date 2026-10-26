@@ -1,4 +1,5 @@
 #import "utils.typ": *
+#import "scheduler.typ" as scheduler
 #import "@preview/cetz:0.5.3"
 
 #let config = (
@@ -176,14 +177,6 @@
             new_jobs.push(job(task, task-param, t))
           }
         }
-
-        // if (task.t + task.o == t) {
-        //   new_jobs.push(job(i + 1, task, t))
-        //   continue
-        // }
-        // if (calc.rem(t, task.t) == 0) {
-        //   new_jobs.push(job(i + 1, task, t))
-        // }
       }
       return new_jobs
     }
@@ -322,83 +315,3 @@
     )
   }
 }
-
-
-
-#let tasks = (
-  (o: 0, c: 2, d: 5, t: 5),
-  (o: 0, c: 1, d: 10, t: 10),
-  (o: 3, c: 1, d: 4, t: 4),
-  (o: 0, c: 1, d: 4, t: 4),
-)
-
-#let tasks = (
-  (c: 2, d: 8, t: 8),
-  (o: 3, c: 3, d: 10, t: 10),
-  (c: 5, d: 14, t: 14),
-)
-
-// #let tasks = (
-//   (c: 30, d: 100, t: 100),
-//   (c: 50, d: 100, t: 150),
-//   (c: 5, d: 100, t: 40),
-// )
-
-#let tasks = (
-  (o: 0, c: 2, d: 5, t: 5),
-  (o: 1, c: 4, d: 10, t: 10),
-)
-
-#let tasks = (
-  (o: 10, c: 1, d: 2, t: 3),
-  (o: 5, c: 2, d: 5, t: 5),
-  (o: 0, c: 3, d: 10, t: 15),
-)
-
-#print-taskset(tasks)
-// #describe-taskset(tasks)
-
-// #utilization(tasks)
-
-// #hyperperiod(tasks)
-
-
-#let config = (
-  task_height: 0.8cm,
-  step_width: 2em,
-)
-#let rm(running_jobs, t) = {
-  return running_jobs.sorted(key: it => it.task.t)
-}
-
-#let dm(running_jobs, t) = {
-  return running_jobs.sorted(key: it => it.task.d)
-}
-
-#let edf(running_jobs, t) = {
-  return running_jobs.sorted(key: it => it.deadline)
-}
-
-#plot(from: 0, to: 40, step: 2, tasks: tasks, config: (
-  task_height: 0.8cm,
-  step_width: 1em,
-))
-
-#plot(from: 0, to: 40, step: 2, scheduler: rm, tasks: tasks, config: (
-  task_height: 0.8cm,
-  step_width: 1em,
-))
-
-#plot(from: 0, to: 40, step: 2, scheduler: edf, tasks: tasks, config: (
-  task_height: 0.8cm,
-  step_width: 1em,
-))
-
-#let priority_assignement(running_jobs, t) = {
-  return running_jobs.sorted(key: it => it.task_id)
-}
-
-#plot(from: 0, to: 40, step: 2, scheduler: priority_assignement, tasks: tasks, display-idle: true, config: (
-  task_height: 0.8cm,
-  step_width: 1em,
-))
