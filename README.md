@@ -33,6 +33,7 @@ git clone git@github.com:adiscepo/typst_templates.git zandies
 |Packages | version | description|
 |-|-|-|
 |`assiettes`| 0.0.1 | Several generic assets  |
+|`rt-sched`| 0.0.1 | Plot real-time tasksets |
 
 (NB: The names are not the most explicit because of the naming rule of Typst)
 > _Package names should not be the obvious or canonical name for a package with
